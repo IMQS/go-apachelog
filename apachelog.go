@@ -68,7 +68,7 @@ func (r *record) finish() {
 
 // log writes the record out as a single log line to r.out.
 func (r *record) log() {
-	timeFormatted := r.endTime.Format("02/Jan/2006 15:04:05")
+	timeFormatted := r.endTime.Format("02/Jan/2006:15:04:05 -0700")
 	fmt.Fprintf(r.out, apacheFormatPattern, r.ip, timeFormatted, r.method, r.uri, r.protocol, r.status,
 		r.responseBytes, r.elapsedTime.Seconds())
 }
