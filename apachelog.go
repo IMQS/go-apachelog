@@ -25,6 +25,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/IMQS/serviceauth"
 	"io"
 	"net"
 	"net/http"
@@ -33,7 +34,7 @@ import (
 
 // Using a variant of apache common log format used in Ruby's Rack::CommonLogger which includes response time
 // in seconds at the the end of the log line.
-const apacheFormatPattern = "%s - - [%s] \"%s %s %s\" %d %d %.4f\n"
+const apacheFormatPattern = "%s - - [%s] \"%s %s %s\" %d %d %.4f %s\n"
 
 var ErrHijackingNotSupported = errors.New("hijacking is not supported")
 
@@ -52,6 +53,7 @@ type record struct {
 	status                int
 	responseBytes         int64
 	elapsedTime           time.Duration
+	session               string
 }
 
 // start sets up any initial state for this record before it is used to serve a request.
@@ -70,7 +72,7 @@ func (r *record) finish() {
 func (r *record) log() {
 	timeFormatted := r.endTime.Format("02/Jan/2006:15:04:05 -0700")
 	fmt.Fprintf(r.out, apacheFormatPattern, r.ip, timeFormatted, r.method, r.uri, r.protocol, r.status,
-		r.responseBytes, r.elapsedTime.Seconds())
+		r.responseBytes, r.elapsedTime.Seconds(), r.session)
 }
 
 // Write proxies to the underlying ResponseWriter.Write method while recording response size.
@@ -121,6 +123,11 @@ func (h *handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rec.uri = r.RequestURI
 	rec.protocol = r.Proto
 	rec.status = http.StatusOK
+	if c, _ := r.Cookie(serviceauth.Imqsauth_cookie); c != nil {
+		rec.session = c.Value[0:6]
+	} else {
+		rec.session = "None"
+	}
 
 	h.Handler.ServeHTTP(rec, r)
 	rec.finish()
