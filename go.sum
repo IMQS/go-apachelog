@@ -1,0 +1,8 @@
+github.com/IMQS/serviceauth v1.4.0 h1:Vkp7UW1xpWxsLEVHrER7cEullktcfm/DuRVWoU94z0Q=
+github.com/IMQS/serviceauth v1.4.0/go.mod h1:/TLp5neYrw/RkwztJHCJzdrb/YaW+uM3ao+HCvsW5Ps=
+github.com/IMQS/serviceconfigsgo v1.4.0 h1:SDUrElceM+USiahvPjyaOHMMvzs2W9mjaKTX0F/yG2o=
+github.com/IMQS/serviceconfigsgo v1.4.0/go.mod h1:XKlWlm9voI4/6XeXhMDd0q5JzZT0pMxU+3JDef9y9u4=
+github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
+github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+gotest.tools/v3 v3.5.1 h1:EENdUnS3pdur5nybKYIh2Vfgc8IUNBjxDPSjtiJcOzU=
+gotest.tools/v3 v3.5.1/go.mod h1:isy3WKz7GK6uNw/sbHzfKBLvlvXwUyV06n6brMxxopU=
