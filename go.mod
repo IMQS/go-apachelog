@@ -1,6 +1,6 @@
 module github.com/IMQS/go-apachelog
 
-go 1.24.5
+go 1.22.7
 
 require github.com/IMQS/serviceauth v1.4.0
 
