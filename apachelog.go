@@ -10,14 +10,14 @@ good to go.
 
 Example:
 
-		mux := http.NewServeMux()
-		mux.HandleFunc("/", handler)
-		loggingHandler := apachelog.NewHandler(mux, os.Stderr)
-		server := &http.Server{
-			Addr: ":8899",
-			Handler: loggingHandler,
-		}
-		server.ListenAndServe()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handler)
+	loggingHandler := apachelog.NewHandler(mux, os.Stderr)
+	server := &http.Server{
+		Addr: ":8899",
+		Handler: loggingHandler,
+	}
+	server.ListenAndServe()
 */
 package apachelog
 
@@ -25,11 +25,12 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/IMQS/serviceauth"
 	"io"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/IMQS/serviceauth"
 )
 
 // Using a variant of apache common log format used in Ruby's Rack::CommonLogger which includes response time
@@ -38,8 +39,8 @@ const apacheFormatPattern = "%s - - [%s] \"%s %s %s\" %d %d %.4f %s\n"
 
 var ErrHijackingNotSupported = errors.New("hijacking is not supported")
 
-// record is a wrapper around a ResponseWriter that carries other metadata needed to write a log line.
-type record struct {
+// Record is a wrapper around a ResponseWriter that carries other metadata needed to write a log line.
+type Record struct {
 	http.ResponseWriter
 	out io.Writer // Same as the handler's out; the record needs to be able to log itself.
 
@@ -57,38 +58,38 @@ type record struct {
 }
 
 // start sets up any initial state for this record before it is used to serve a request.
-func (r *record) start() {
+func (r *Record) start() {
 	r.startTime = time.Now()
 }
 
 // finish finalizes any data and logs the request.
-func (r *record) finish() {
+func (r *Record) finish() {
 	r.endTime = time.Now()
 	r.elapsedTime = r.endTime.Sub(r.startTime)
 	r.log()
 }
 
 // log writes the record out as a single log line to r.out.
-func (r *record) log() {
+func (r *Record) log() {
 	timeFormatted := r.endTime.Format("02/Jan/2006:15:04:05 -0700")
 	fmt.Fprintf(r.out, apacheFormatPattern, r.ip, timeFormatted, r.method, r.uri, r.protocol, r.status,
 		r.responseBytes, r.elapsedTime.Seconds(), r.session)
 }
 
 // Write proxies to the underlying ResponseWriter.Write method while recording response size.
-func (r *record) Write(p []byte) (int, error) {
+func (r *Record) Write(p []byte) (int, error) {
 	written, err := r.ResponseWriter.Write(p)
 	r.responseBytes += int64(written)
 	return written, err
 }
 
 // WriteHeader proxies to the underlying ResponseWriter.WriteHeader method while recording response status.
-func (r *record) WriteHeader(status int) {
+func (r *Record) WriteHeader(status int) {
 	r.status = status
 	r.ResponseWriter.WriteHeader(status)
 }
 
-func (r *record) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+func (r *Record) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	w, ok := r.ResponseWriter.(http.Hijacker)
 	if !ok {
 		return nil, nil, ErrHijackingNotSupported
@@ -114,7 +115,7 @@ func NewHandler(h http.Handler, out io.Writer) http.Handler {
 
 // ServeHTTP delegates to the underlying handler's ServeHTTP method and writes one log line for every call.
 func (h *handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	rec := new(record)
+	rec := new(Record)
 	rec.start()
 	rec.ResponseWriter = rw
 	rec.out = h.out
